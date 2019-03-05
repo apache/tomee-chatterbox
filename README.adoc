@@ -1,0 +1,171 @@
+= Chatterbox
+
+A collection of sample JCA connectors.
+
+== Projects
+
+The following connectors are available:
+
+- IMAP
+- Twitter
+- XMPP
+- Slack
+
+These connectors demonstrate inbound and outbound connectivity, using strongly typed method parameters and an API based
+on JAX-RS +@Path+ / +@PathParam+ annotations.
+
+== Annotations
+
+Each connector has an API module that defines a number of annotations. The annotations are defined in pairs, such as
++@Body+ and +@BodyParam+. The method parameter (+@Body+ in this example) optionally allows a regular expression to be
+specified as the annotation value. This regular expression should match for the method to be called. The matching +Param+
+annotation can be specified on a parameter for the value to be passed into the method. The parameter can optionally
+reference a group in the regular expression on the matching method annotation.
+
+Consider the following example:
+
+[source,java,numbered]
+----
+    @MessageDriven
+    public class InboxReader implements MailListener {
+
+        private static final Logger LOGGER = Logger.getLogger(InboxReader.class.getName());
+
+        @Subject("Order {orderId: \\d+}")
+        public void logMessage(@FromParam final String from, @SubjectParam final String subject, @BodyParam final String message
+            @SubjectParam("orderId") final Integer orderId) {
+            // TODO: logic goes here
+        }
+
+    }
+----
+
+This method will be called for any incoming e-mail where the subject is in the format "Order XXX" where XXX is numerical
+and the orderId parameter is set to the part of the subject that matches the order ID. A +Param+ annotation without a
+value set, such as +@SubjectParam+ will receive the full value as opposed to the matching regex group.
+
+== Project structure
+
+Each connector consists of an API, implementation, RAR module and a sample WAR file demonstrating simple cases of using
+the connector.
+
+In TomEE, the API module should be copied to the +lib/+ directory, the RAR module deployed under +apps/+ and the sample
+WAR deployed in +webapps/+.
+
+The WAR module for each project can be executed using the Maven tomee:run plugin. To use this, add the necessary config
+settings to ~/.openejb/system.properties (see tables for each connector below) and run `mvn tomee:run` in the WAR module
+directory.
+
+== IMAP connector
+
+The IMAP connector will poll the inbox folder for a specified IMAP account every 10 seconds, and invoke matching methods on MDBs that
+implement the +MailListener+ interface.
+
+The following annotations are available:
+
+|===
+| Method Annotation | Parameter Annotation | Description
+| @From
+| @FromParam
+| Matches the sender of the email. Where a value is specified, on the +@FormParam+ annotation, the value of the parameter will be the portion of the sender's address matching the regex group
+| @Subject
+| @SubjectParam
+| Matches the subject of the email. Where a value is specified, on the +@SubjectParam+ annotation, the value of the parameter will be the portion of the subject matching the regex group
+| @Body
+| @BodyParam
+| Matches the message body of the email. Where a value is specified, on the +@BodyParam+ annotation, the value of the parameter will be the portion of the message body matching the regex group
+|===
+
+This connector has the following configuration options:
+
+|===
+| Property name | Default | Description
+| Host
+| No default
+| The IMAP host to connect to
+| Port
+| 993
+| The IMAP port
+| Username
+| No default
+| The username to fetch mail for
+| Password
+| No default
+| The password for the user account
+|===
+
+== Twitter connector
+
+The Twitter connector opens a long running stream to the specified user's tweets, and invokes MDBs implementing the +TwitterUpdates+
+interface. New tweets where the status and/or screen name of the Tweeter match the annotations on the MDB method will cause the
+method to be invoked.
+
+The following annotations are available:
+
+|===
+| Method Annotation | Parameter Annotation | Description
+| @Tweet
+| @TweetParam
+| Matches the full tweet. Where a value is specified, on the +@TweetParam+ annotation, the value of the parameter will be the portion of the tweet matching the regex group.
+| @User
+| @UserParam
+| Matches the screen name of the user tweeting. Where a value is specified, on the +@UserParam+ annotation, the value of the parameter will be the portion of the user's screen name matching the regex group
+|===
+
+This connector has the following configuration options:
+
+|===
+| Property name |  Description
+| ConsumerKey
+| The OAuth Consumer key
+| ConsumerSecret
+| The OAuth Consumer secret
+| AccessToken
+| The OAuth Access token
+| AccessTokenSecret
+| The OAuth Access token secret
+|===
+
+These credentials can be obtained by creating a new application on the Twitter Developers site, and authorizing the
+application for your Twitter account.
+
+== XMPP connector
+
+The XMPP connector is a bidirectional connector. MDBs can be invoked on messages being sent to the account signed into
+the connector. ConnectionFactory and Connection classes can be used in managed components to send messages to other
+users.
+
+The following annotations are available:
+
+|===
+| Method Annotation | Parameter Annotation | Description
+| @Sender
+| @SenderParam
+| Matches the sender of the message. Where a value is specified, on the +@SenderParam+ annotation, the value of the parameter will be the portion of the sender's address matching the regex group
+| @MessageText
+| @MessageTextParam
+| Matches the text of the message. Where a value is specified, on the +@MessageTextParam+ annotation, the value of the parameter will be the portion of the message matching the regex group
+|===
+
+This connector has the following configuration options:
+
+|===
+| Property name | Default | Description
+| Host
+| No default
+| The XMPP host to connect to
+| Port
+| 5222
+| The XMPP port
+| Username
+| No default
+| The username to fetch mail for
+| Password
+| No default
+| The password for the user account
+| Service name
+| No default
+| The XMPP service to connect to
+|===
+
+

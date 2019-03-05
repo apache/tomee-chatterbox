@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~  Licensed to the Apache Software Foundation (ASF) under one
+  ~  or more contributor license agreements.  See the NOTICE file
+  ~  distributed with this work for additional information
+  ~  regarding copyright ownership.  The ASF licenses this file
+  ~  to you under the Apache License, Version 2.0 (the
+  ~  "License"); you may not use this file except in compliance
+  ~  with the License.  You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing,
+  ~  software distributed under the License is distributed on an
+  ~  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~  KIND, either express or implied.  See the License for the
+  ~  specific language governing permissions and limitations
+  ~  under the License.
+  -->
+
+<connector xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns="http://java.sun.com/xml/ns/javaee"
+           xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+           http://java.sun.com/xml/ns/j2ee/connector_1_6.xsd"
+           version="1.6">
+
+  <display-name>XMPPConnector</display-name>
+  <vendor-name>Apache Software Foundation</vendor-name>
+  <resourceadapter-version>1.0</resourceadapter-version>
+  <license>
+    <license-required>false</license-required>
+  </license>
+  <resourceadapter>
+    <resourceadapter-class>org.apache.tomee.chatterbox.xmpp.impl.XMPPResourceAdapter</resourceadapter-class>
+    <config-property>
+      <config-property-name>host</config-property-name>
+      <config-property-type>java.lang.String</config-property-type>
+      <config-property-value>localhost</config-property-value>
+    </config-property>
+    <config-property>
+      <config-property-name>port</config-property-name>
+      <config-property-type>java.lang.Integer</config-property-type>
+      <config-property-value>5222</config-property-value>
+    </config-property>
+    <config-property>
+      <config-property-name>password</config-property-name>
+      <config-property-type>java.lang.String</config-property-type>
+    </config-property>
+    <config-property>
+      <config-property-name>username</config-property-name>
+      <config-property-type>java.lang.String</config-property-type>
+    </config-property>
+    <outbound-resourceadapter>
+      <connection-definition>
+        <managedconnectionfactory-class>org.apache.tomee.chatterbox.xmpp.impl.XMPPManagedConnectionFactory
+        </managedconnectionfactory-class>
+        <connectionfactory-interface>XMPPConnectionFactory
+        </connectionfactory-interface>
+        <connectionfactory-impl-class>org.apache.tomee.chatterbox.xmpp.impl.XMPPConnectionFactoryImpl
+        </connectionfactory-impl-class>
+        <connection-interface>XMPPConnection</connection-interface>
+        <connection-impl-class>XMPPMessageListener</connection-impl-class>
+      </connection-definition>
+      <transaction-support>NoTransaction</transaction-support>
+      <reauthentication-support>false</reauthentication-support>
+    </outbound-resourceadapter>
+    <inbound-resourceadapter>
+      <messageadapter>
+        <messagelistener>
+          <messagelistener-type>XMPPMessageListener</messagelistener-type>
+          <activationspec>
+            <activationspec-class>org.apache.tomee.chatterbox.xmpp.impl.inflow.XMPPActivationSpec</activationspec-class>
+          </activationspec>
+        </messagelistener>
+      </messageadapter>
+    </inbound-resourceadapter>
+  </resourceadapter>
+</connector>
