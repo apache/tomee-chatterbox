@@ -25,7 +25,7 @@
   <parent>
     <groupId>org.apache.tomee.chatterbox</groupId>
     <artifactId>chatterbox-imap-parent</artifactId>
-    <version>0.3-TT.1</version>
+    <version>0.3-SNAPSHOT</version>
   </parent>
 
   <artifactId>chatterbox-imap-api</artifactId>

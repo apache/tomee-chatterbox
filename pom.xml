@@ -30,7 +30,7 @@
 
   <groupId>org.apache.tomee.chatterbox</groupId>
   <artifactId>chatterbox-parent</artifactId>
-  <version>0.3-TT.1</version>
+  <version>0.3-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Chatterbox</name>
 
@@ -46,7 +46,7 @@
     <connection>scm:git:https://gitbox.apache.org/repos/asf/tomee-chatterbox.git</connection>
     <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/tomee-chatterbox.git</developerConnection>
     <url>https://gitbox.apache.org/repos/asf/tomee-chatterbox.git</url>
-    <tag>chatterbox-parent-0.3-TT.1</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <organization>
