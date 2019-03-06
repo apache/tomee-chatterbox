@@ -63,7 +63,11 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@Connector(description = "IMAP ResourceAdapter", displayName = "IMAP ResourceAdapter", eisType = "IMAP Adapter", version = "1.0")
+@Connector(
+        description = "IMAP ResourceAdapter",
+        displayName = "IMAP ResourceAdapter",
+        eisType = "IMAP Adapter",
+        version = "1.0")
 public class ImapResourceAdapter implements ResourceAdapter {
 
     private static final Logger LOGGER = Logger.getLogger(ImapResourceAdapter.class.getName());
