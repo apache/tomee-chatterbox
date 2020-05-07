@@ -32,13 +32,6 @@
   <packaging>jar</packaging>
   <name>Chatterbox :: IMAP :: API</name>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.arquillian>1.1.1.Final</version.arquillian>
-    <version.shrinkwrap.descriptor>2.0.0-alpha-5</version.shrinkwrap.descriptor>
-    <version.shrinkwrap.shrinkwrap>1.0.1</version.shrinkwrap.shrinkwrap>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>javax</groupId>

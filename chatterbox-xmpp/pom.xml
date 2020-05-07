@@ -36,8 +36,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <version.arquillian>1.1.1.Final</version.arquillian>
-    <version.tomee>1.7.2</version.tomee>
-    <version.openejb>4.7.2</version.openejb>
+    <version.tomee>8.0.1</version.tomee>
+    <version.openejb>8.0.1</version.openejb>
     <version.crest>0.3</version.crest>
     <maven.checkstyle.plugin.version>2.16</maven.checkstyle.plugin.version>
     <smack-core.version>4.0.6</smack-core.version>

@@ -38,8 +38,8 @@
     <version.arquillian>1.1.1.Final</version.arquillian>
     <version.shrinkwrap.descriptor>2.0.0-alpha-5</version.shrinkwrap.descriptor>
     <version.shrinkwrap.shrinkwrap>1.0.1</version.shrinkwrap.shrinkwrap>
-    <version.tomee>1.7.2</version.tomee>
-    <version.openejb>4.7.2</version.openejb>
+    <version.tomee>8.0.1</version.tomee>
+    <version.openejb>8.0.1</version.openejb>
     <version.crest>0.3</version.crest>
     <maven.checkstyle.plugin.version>2.16</maven.checkstyle.plugin.version>
   </properties>
@@ -189,7 +189,7 @@
       <dependencyManagement>
         <dependencies>
           <dependency>
-            <groupId>org.apache.openejb</groupId>
+            <groupId>org.apache.tomee</groupId>
             <artifactId>arquillian-tomee-remote</artifactId>
             <version>${tomee.version}</version>
           </dependency>
@@ -216,7 +216,7 @@
             <version>2.1.0</version>
           </dependency>
           <dependency>
-            <groupId>org.apache.openejb</groupId>
+            <groupId>org.apache.tomee</groupId>
             <artifactId>apache-tomee</artifactId>
             <version>${tomee.version}</version>
             <classifier>${tomee.classifier}</classifier>
