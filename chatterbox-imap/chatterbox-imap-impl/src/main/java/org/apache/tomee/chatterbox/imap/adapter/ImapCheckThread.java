@@ -65,12 +65,21 @@ public class ImapCheckThread extends Thread {
     @Override
     public void run() {
         while (!stopped.get()) {
+            Store store = null;
             try {
-                final Store store = connect(session, resourceAdapter);
+                store = connect(session, resourceAdapter);
                 processFolder(store, "inbox");
             } catch (MessagingException e) {
                 LOGGER.log(Level.WARNING, String.format("Failed to Connect %s %s: %s",
                         resourceAdapter, e.getClass().getName(), e.getMessage()));
+            } finally {
+                if (store != null) {
+                    try {
+                        store.close();
+                    } catch (Exception e) {
+                        LOGGER.log(Level.WARNING, "Unable to close store" , e);
+                    }
+                }
             }
 
             try {
