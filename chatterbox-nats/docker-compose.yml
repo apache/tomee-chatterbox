@@ -1,0 +1,35 @@
+version: '3.1'
+services:
+   nats-docker:
+     image: nats-streaming:0.17.0
+     restart: always
+     command:
+       - '-p'
+       - '4222'
+       - '-m'
+       - '8222'
+       - '-hbi'
+       - '5s'
+       - '-hbt'
+       - '5s'
+       - '-hbf'
+       - '2'
+       - '-SD'
+       - '-cid'
+       - 'yourclientid'
+     environment:
+       TZ: Europe/London
+       LANG: en_GB.UTF-8
+       LANGUAGE: en_GB:en
+       LC_ALL: en_GB.UTF-8
+     ports:
+       - '4222:4222'
+       - '8222:8222'
+     expose:
+       - 4222
+       - 8222
+     networks:
+       - backend
+networks:
+   backend:
+     driver: bridge

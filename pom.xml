@@ -78,6 +78,7 @@
     <module>chatterbox-twitter</module>
     <module>chatterbox-xmpp</module>
     <module>chatterbox-slack</module>
+    <module>chatterbox-nats</module>
   </modules>
 
   <build>
