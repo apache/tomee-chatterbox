@@ -73,7 +73,7 @@ public class NATSResourceAdapter implements ResourceAdapter {
         try {
             cf = new
                     StreamingConnectionFactory(new Options.Builder().natsUrl(baseAddress)
-                    .clusterId("cluster-id").clientId("client-id").build());
+                    .clusterId("cluster-id").clientId("yourclientid").build());
 
             connection = cf.createConnection();
         } catch (Throwable t) {
