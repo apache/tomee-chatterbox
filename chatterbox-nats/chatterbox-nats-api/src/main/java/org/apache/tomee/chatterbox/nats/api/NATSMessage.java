@@ -16,11 +16,21 @@
  */
 package org.apache.tomee.chatterbox.nats.api;
 
-/**
- * @version $Revision$ $Date$
- */
-public interface InboundListener {
+import java.time.Instant;
 
-    public void onMessage(final NATSMessage message) throws NATSException;
-
+public interface NATSMessage {
+    Instant getInstant();
+    long getSequence();
+    String getSubject();
+    void setSubject(String subject);
+    String getReplyTo();
+    void setReplyTo(String reply);
+    byte[] getData();
+    void setData(byte[] data);
+    void setData(byte[] data, int offset, int length);
+    long getTimestamp();
+    public boolean isRedelivered();
+    public int getCrc32();
+    public void ack();
+    public String toString();
 }

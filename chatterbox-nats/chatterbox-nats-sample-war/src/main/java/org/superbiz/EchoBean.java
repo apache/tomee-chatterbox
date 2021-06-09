@@ -17,12 +17,11 @@
 package org.superbiz;
 
 import org.apache.tomee.chatterbox.nats.api.InboundListener;
+import org.apache.tomee.chatterbox.nats.api.NATSMessage;
 import org.apache.tomee.chatterbox.nats.api.NATSException;
-import io.nats.streaming.Message;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @MessageDriven(name = "Echo", activationConfig = {
@@ -30,15 +29,14 @@ import java.nio.charset.StandardCharsets;
 })
 public class EchoBean implements InboundListener {
 
-
     @Override
-    public void onMessage(final Message message) throws NATSException {
+    public void onMessage(final NATSMessage message) throws NATSException {
         try {
             final String text = new String(message.getData(), StandardCharsets.UTF_8);
             System.out.println(text);
 
             message.ack();
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new NATSException(e);
         }
     }

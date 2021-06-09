@@ -24,6 +24,7 @@ import io.nats.streaming.StreamingConnectionFactory;
 import io.nats.streaming.Subscription;
 import org.apache.tomee.chatterbox.nats.api.InboundListener;
 import org.apache.tomee.chatterbox.nats.api.NATSException;
+import org.apache.tomee.chatterbox.nats.api.NATSMessage;
 
 import javax.resource.ResourceException;
 import javax.resource.spi.ActivationSpec;
@@ -38,7 +39,9 @@ import javax.resource.spi.work.Work;
 import javax.resource.spi.work.WorkManager;
 import javax.transaction.xa.XAResource;
 import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.lang.IllegalStateException;
@@ -51,7 +54,7 @@ public class NATSResourceAdapter implements ResourceAdapter {
 
     static {
         try {
-            ONMESSAGE = InboundListener.class.getMethod("onMessage", Message.class);
+            ONMESSAGE = InboundListener.class.getMethod("onMessage", NATSMessage.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -75,6 +78,7 @@ public class NATSResourceAdapter implements ResourceAdapter {
             connection = cf.createConnection();
         } catch (Throwable t) {
             // TODO: log this
+            t.printStackTrace();
         }
     }
 
@@ -154,7 +158,15 @@ public class NATSResourceAdapter implements ResourceAdapter {
             try {
                 try {
                     messageEndpoint.beforeDelivery(ONMESSAGE);
-                    ((InboundListener) messageEndpoint).onMessage(msg);
+
+                    final NATSMessage message = (NATSMessage) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{InboundListener.class}, new InvocationHandler() {
+                        @Override
+                        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                            return method.invoke(msg, args);
+                        }
+                    });
+
+                    ((InboundListener) messageEndpoint).onMessage(message);
                 } finally {
                     messageEndpoint.afterDelivery();
                 }
