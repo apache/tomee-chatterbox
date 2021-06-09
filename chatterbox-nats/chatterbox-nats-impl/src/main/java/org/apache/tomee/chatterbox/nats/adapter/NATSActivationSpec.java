@@ -29,6 +29,7 @@ public class NATSActivationSpec implements ActivationSpec {
 
     private ResourceAdapter resourceAdapter;
     private Class beanClass;
+    private String subject;
 
     public Class getBeanClass() {
         return beanClass;
@@ -36,6 +37,14 @@ public class NATSActivationSpec implements ActivationSpec {
 
     public void setBeanClass(Class beanClass) {
         this.beanClass = beanClass;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
     }
 
     @Override

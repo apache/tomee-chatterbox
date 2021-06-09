@@ -40,6 +40,12 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>io.nats</groupId>
+      <artifactId>java-nats-streaming</artifactId>
+      <version>2.2.3</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>chatterbox-nats-impl</artifactId>
       <version>${project.version}</version>
@@ -89,8 +95,7 @@
           <tomeeClassifier>plus</tomeeClassifier>
           <libs>
             <lib>org.apache.tomee.chatterbox:chatterbox-nats-api:${project.version}:jar</lib>
-            <lib>org.tomitribe:tomitribe-util:1.1.0:jar</lib>
-            <lib>org.tomitribe:tomitribe-crest-api:0.3:jar</lib>
+            <lib>io.nats:java-nats-streaming:2.2.3:jar</lib>
           </libs>
           <apps>
             <app>org.apache.tomee.chatterbox:chatterbox-nats-rar:${project.version}:rar</app>

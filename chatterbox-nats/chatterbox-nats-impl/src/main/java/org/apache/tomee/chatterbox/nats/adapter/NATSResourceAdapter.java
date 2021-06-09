@@ -16,6 +16,15 @@
  */
 package org.apache.tomee.chatterbox.nats.adapter;
 
+import io.nats.streaming.Message;
+import io.nats.streaming.MessageHandler;
+import io.nats.streaming.Options;
+import io.nats.streaming.StreamingConnection;
+import io.nats.streaming.StreamingConnectionFactory;
+import io.nats.streaming.Subscription;
+import org.apache.tomee.chatterbox.nats.api.InboundListener;
+import org.apache.tomee.chatterbox.nats.api.NATSException;
+
 import javax.resource.ResourceException;
 import javax.resource.spi.ActivationSpec;
 import javax.resource.spi.BootstrapContext;
@@ -28,6 +37,8 @@ import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.resource.spi.work.Work;
 import javax.resource.spi.work.WorkManager;
 import javax.transaction.xa.XAResource;
+import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.lang.IllegalStateException;
@@ -36,20 +47,43 @@ import java.lang.IllegalStateException;
 public class NATSResourceAdapter implements ResourceAdapter {
     final Map<NATSActivationSpec, EndpointTarget> targets = new ConcurrentHashMap<NATSActivationSpec, EndpointTarget>();
 
+    private static final Method ONMESSAGE;
+
+    static {
+        try {
+            ONMESSAGE = InboundListener.class.getMethod("onMessage", Message.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @ConfigProperty
-    private String token;
+    private String baseAddress;
 
     private WorkManager workManager;
-    private String user;
-    private String userId;
+    private StreamingConnectionFactory cf;
+    private StreamingConnection connection;
 
     public void start(BootstrapContext bootstrapContext) throws ResourceAdapterInternalException {
         workManager = bootstrapContext.getWorkManager();
-        // connect to NATS
+
+        try {
+            cf = new
+                    StreamingConnectionFactory(new Options.Builder().natsUrl(baseAddress)
+                    .clusterId("cluster-id").clientId("client-id").build());
+
+            connection = cf.createConnection();
+        } catch (Throwable t) {
+            // TODO: log this
+        }
     }
 
     public void stop() {
-        // disconnect
+        try {
+            connection.close();
+        } catch (Throwable t) {
+            // TODO: log this
+        }
     }
 
     public void endpointActivation(final MessageEndpointFactory messageEndpointFactory, final ActivationSpec activationSpec)
@@ -64,11 +98,10 @@ public class NATSResourceAdapter implements ResourceAdapter {
                     final MessageEndpoint messageEndpoint = messageEndpointFactory.createEndpoint(null);
 
                     final EndpointTarget target = new EndpointTarget(messageEndpoint);
-                    final Class<?> endpointClass = NATSActivationSpec.getBeanClass() != null ? NATSActivationSpec
-                            .getBeanClass() : messageEndpointFactory.getEndpointClass();
-
-
                     targets.put(NATSActivationSpec, target);
+
+                    final Subscription subscription = connection.subscribe(((NATSActivationSpec) activationSpec).getSubject(), target);
+                    target.setSubscription(subscription);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -83,15 +116,14 @@ public class NATSResourceAdapter implements ResourceAdapter {
     }
 
     public void endpointDeactivation(MessageEndpointFactory messageEndpointFactory, ActivationSpec activationSpec) {
-        final NATSActivationSpec telnetActivationSpec = (NATSActivationSpec) activationSpec;
+        final NATSActivationSpec natsActivationSpec = (NATSActivationSpec) activationSpec;
 
-        final EndpointTarget endpointTarget = targets.get(telnetActivationSpec);
+        final EndpointTarget endpointTarget = targets.get(natsActivationSpec);
         if (endpointTarget == null) {
             throw new IllegalStateException("No EndpointTarget to undeploy for ActivationSpec " + activationSpec);
         }
 
-        // unsubscribe
-
+        endpointTarget.close();
         endpointTarget.messageEndpoint.release();
     }
 
@@ -99,17 +131,54 @@ public class NATSResourceAdapter implements ResourceAdapter {
         return new XAResource[0];
     }
 
-    public void sendMessage(final String channel, final String message) {
+    public void publish(final String subject, final byte[] data) throws NATSException {
         // publish a message
+        try {
+            connection.publish(subject, data);
+        } catch (Exception e) {
+            throw new NATSException(e);
+        }
     }
 
 
-    private static class EndpointTarget {
+    private static class EndpointTarget implements MessageHandler {
         private final MessageEndpoint messageEndpoint;
+        private Subscription subscription;
 
-        public EndpointTarget(MessageEndpoint messageEndpoint) {
+        public EndpointTarget(final MessageEndpoint messageEndpoint) {
             this.messageEndpoint = messageEndpoint;
         }
 
+        @Override
+        public void onMessage(final Message msg) {
+            try {
+                try {
+                    messageEndpoint.beforeDelivery(ONMESSAGE);
+                    ((InboundListener) messageEndpoint).onMessage(msg);
+                } finally {
+                    messageEndpoint.afterDelivery();
+                }
+            } catch (Throwable t) {
+                // TODO: log this
+            }
+        }
+
+        public void setSubscription(final Subscription subscription) {
+            this.subscription = subscription;
+        }
+
+        public Subscription getSubscription() {
+            return subscription;
+        }
+
+        public void close() {
+            try {
+                if (subscription != null) {
+                    subscription.close(true);
+                }
+            } catch (IOException e) {
+                // TODO: log this
+            }
+        }
     }
 }

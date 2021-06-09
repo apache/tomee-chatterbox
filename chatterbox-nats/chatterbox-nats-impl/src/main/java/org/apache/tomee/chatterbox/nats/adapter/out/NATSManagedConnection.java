@@ -20,6 +20,7 @@ package org.apache.tomee.chatterbox.nats.adapter.out;
 
 import org.apache.tomee.chatterbox.nats.adapter.NATSResourceAdapter;
 import org.apache.tomee.chatterbox.nats.api.NATSConnection;
+import org.apache.tomee.chatterbox.nats.api.NATSException;
 
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
@@ -131,10 +132,10 @@ public class NATSManagedConnection implements ManagedConnection {
         return new NATSManagedConnectionMetaData();
     }
 
-    void sendMessage(final String channel, final String message) {
+    void publish(final String subject, final byte[] data) throws NATSException {
         log.finest("sendMessage()");
 
         final NATSResourceAdapter resourceAdapter = (NATSResourceAdapter) mcf.getResourceAdapter();
-        resourceAdapter.sendMessage(channel, message);
+        resourceAdapter.publish(subject, data);
     }
 }

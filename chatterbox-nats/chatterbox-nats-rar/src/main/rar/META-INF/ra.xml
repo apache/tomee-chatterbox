@@ -22,9 +22,9 @@
            xmlns="http://xmlns.jcp.org/xml/ns/javaee"
            xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/connector_1_7.xsd"
            version="1.7">
-  <description>Chatterbox Slack Connector</description>
-  <display-name>Chatterbox Slack Connector</display-name>
-  <eis-type>Slack Connector</eis-type>
+  <description>Chatterbox NATS Connector</description>
+  <display-name>Chatterbox NATS Connector</display-name>
+  <eis-type>NATS Connector</eis-type>
   <resourceadapter-version>1.0</resourceadapter-version>
   <license>
     <license-required>false</license-required>
@@ -32,18 +32,18 @@
   <resourceadapter>
     <resourceadapter-class>org.apache.tomee.chatterbox.nats.adapter.NATSResourceAdapter</resourceadapter-class>
     <config-property>
-      <config-property-name>token</config-property-name>
+      <config-property-name>baseAddress</config-property-name>
       <config-property-type>String</config-property-type>
     </config-property>
     <outbound-resourceadapter>
       <connection-definition>
         <managedconnectionfactory-class>org.apache.tomee.chatterbox.nats.adapter.out.NATSManagedConnectionFactory
         </managedconnectionfactory-class>
-        <connectionfactory-interface>SlackConnectionFactory
+        <connectionfactory-interface>org.apache.tomee.chatterbox.nats.api.NATSConnectionFactory
         </connectionfactory-interface>
         <connectionfactory-impl-class>org.apache.tomee.chatterbox.nats.adapter.out.NATSConnectionFactoryImpl
         </connectionfactory-impl-class>
-        <connection-interface>SlackConnection</connection-interface>
+        <connection-interface>org.apache.tomee.chatterbox.nats.api.NATSConnection</connection-interface>
         <connection-impl-class>org.apache.tomee.chatterbox.nats.adapter.out.NATSConnectionImpl</connection-impl-class>
       </connection-definition>
       <transaction-support>NoTransaction</transaction-support>
@@ -52,7 +52,7 @@
     <inbound-resourceadapter>
       <messageadapter>
         <messagelistener>
-          <messagelistener-type>InboundListener</messagelistener-type>
+          <messagelistener-type>org.apache.tomee.chatterbox.nats.api.InboundListener</messagelistener-type>
           <activationspec>
             <activationspec-class>org.apache.tomee.chatterbox.nats.adapter.NATSActivationSpec</activationspec-class>
           </activationspec>

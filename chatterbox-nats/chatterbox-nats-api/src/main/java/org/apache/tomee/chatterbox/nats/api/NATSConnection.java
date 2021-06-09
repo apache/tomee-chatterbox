@@ -20,7 +20,7 @@
 package org.apache.tomee.chatterbox.nats.api;
 
 public interface NATSConnection {
-    public void sendMessage(final String channel, final String message);
+    public void publish(final String subject, final byte[] data) throws NATSException;
 
     public void close();
 }

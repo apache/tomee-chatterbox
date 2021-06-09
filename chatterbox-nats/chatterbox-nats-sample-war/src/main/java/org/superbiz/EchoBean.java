@@ -18,16 +18,28 @@ package org.superbiz;
 
 import org.apache.tomee.chatterbox.nats.api.InboundListener;
 import org.apache.tomee.chatterbox.nats.api.NATSException;
-import org.apache.tomee.chatterbox.nats.api.NATSMessage;
+import io.nats.streaming.Message;
 
+import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
-@MessageDriven(name = "Receiver")
-public class SystemBean implements InboundListener {
+@MessageDriven(name = "Echo", activationConfig = {
+        @ActivationConfigProperty(propertyName = "subject", propertyValue = "echo")
+})
+public class EchoBean implements InboundListener {
 
 
     @Override
-    public void onMessage(NATSMessage message) throws NATSException {
-        // TODO: fill in implementation here
+    public void onMessage(final Message message) throws NATSException {
+        try {
+            final String text = new String(message.getData(), StandardCharsets.UTF_8);
+            System.out.println(text);
+
+            message.ack();
+        } catch (IOException e) {
+            throw new NATSException(e);
+        }
     }
 }

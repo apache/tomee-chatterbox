@@ -19,6 +19,7 @@
 package org.apache.tomee.chatterbox.nats.adapter.out;
 
 import org.apache.tomee.chatterbox.nats.api.NATSConnection;
+import org.apache.tomee.chatterbox.nats.api.NATSException;
 
 import java.util.logging.Logger;
 
@@ -34,8 +35,8 @@ public class NATSConnectionImpl implements NATSConnection {
         this.mcf = mcf;
     }
 
-    public void sendMessage(final String channel, final String message) {
-        mc.sendMessage(channel, message);
+    public void publish(final String subject, final byte[] data) throws NATSException {
+        mc.publish(subject, data);
     }
 
     public void close() {

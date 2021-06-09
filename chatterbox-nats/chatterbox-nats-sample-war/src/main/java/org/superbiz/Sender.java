@@ -29,6 +29,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
+import java.nio.charset.StandardCharsets;
 
 @Singleton
 @Lock(LockType.READ)
@@ -38,16 +39,16 @@ public class Sender {
     @Resource
     private NATSConnectionFactory cf;
 
-    @Path("{channel}")
+    @Path("{subject}")
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
-    public void sendMessage(@PathParam("channel") final String channel, final String message) {
+    public void sendMessage(@PathParam("subject") final String subject, final String message) {
         try {
             final NATSConnection connection = cf.getConnection();
-            connection.sendMessage(channel, message);
+            connection.publish(subject, message.getBytes(StandardCharsets.UTF_8));
             connection.close();
-        } catch (ResourceException e) {
-            // ignore
+        } catch (Throwable t) {
+            // TODO: log this
         }
     }
 

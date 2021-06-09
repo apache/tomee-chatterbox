@@ -20,4 +20,22 @@ package org.apache.tomee.chatterbox.nats.api;
  * @version $Revision$ $Date$
  */
 public class NATSException extends Exception {
+    public NATSException() {
+    }
+
+    public NATSException(String message) {
+        super(message);
+    }
+
+    public NATSException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public NATSException(Throwable cause) {
+        super(cause);
+    }
+
+    public NATSException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 }

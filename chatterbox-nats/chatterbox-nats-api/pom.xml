@@ -45,5 +45,11 @@
       <artifactId>javaee-api</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>io.nats</groupId>
+      <artifactId>java-nats-streaming</artifactId>
+      <version>2.2.3</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 </project>

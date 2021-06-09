@@ -16,11 +16,13 @@
  */
 package org.apache.tomee.chatterbox.nats.api;
 
+import io.nats.streaming.Message;
+
 /**
  * @version $Revision$ $Date$
  */
 public interface InboundListener {
 
-    public void onMessage(final NATSMessage message) throws NATSException;
+    public void onMessage(final Message message) throws NATSException;
 
 }
