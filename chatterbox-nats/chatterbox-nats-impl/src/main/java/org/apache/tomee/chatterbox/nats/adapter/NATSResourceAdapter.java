@@ -73,7 +73,7 @@ public class NATSResourceAdapter implements ResourceAdapter {
         try {
             cf = new
                     StreamingConnectionFactory(new Options.Builder().natsUrl(baseAddress)
-                    .clusterId("cluster-id").clientId("yourclientid").build());
+                    .clusterId("yourclientid").clientId("anythingyoulike").build());
 
             connection = cf.createConnection();
         } catch (Throwable t) {
@@ -159,14 +159,21 @@ public class NATSResourceAdapter implements ResourceAdapter {
                 try {
                     messageEndpoint.beforeDelivery(ONMESSAGE);
 
-                    final NATSMessage message = (NATSMessage) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{InboundListener.class}, new InvocationHandler() {
-                        @Override
-                        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                            return method.invoke(msg, args);
-                        }
-                    });
+                    final NATSMessage message = (NATSMessage) Proxy.newProxyInstance(
+                            getClass().getClassLoader(),
+                            new Class[]{NATSMessage.class},
+                            new InvocationHandler() {
+                                @Override
+                                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                                    final Method m = Message.class.getMethod(method.getName(), method.getParameterTypes());
+                                    return m.invoke(msg, args);
+                                }
+                            }
+                    );
 
                     ((InboundListener) messageEndpoint).onMessage(message);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 } finally {
                     messageEndpoint.afterDelivery();
                 }

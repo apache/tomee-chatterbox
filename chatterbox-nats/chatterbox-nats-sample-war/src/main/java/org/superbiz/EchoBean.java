@@ -34,8 +34,6 @@ public class EchoBean implements InboundListener {
         try {
             final String text = new String(message.getData(), StandardCharsets.UTF_8);
             System.out.println(text);
-
-            message.ack();
         } catch (Exception e) {
             throw new NATSException(e);
         }
