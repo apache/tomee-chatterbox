@@ -35,6 +35,14 @@
       <config-property-name>baseAddress</config-property-name>
       <config-property-type>String</config-property-type>
     </config-property>
+    <config-property>
+      <config-property-name>clientId</config-property-name>
+      <config-property-type>String</config-property-type>
+    </config-property>
+    <config-property>
+      <config-property-name>clusterId</config-property-name>
+      <config-property-type>String</config-property-type>
+    </config-property>
     <outbound-resourceadapter>
       <connection-definition>
         <managedconnectionfactory-class>org.apache.tomee.chatterbox.nats.adapter.out.NATSManagedConnectionFactory

@@ -45,10 +45,13 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.lang.IllegalStateException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Connector(description = "Sample Resource Adapter", displayName = "Sample Resource Adapter", eisType = "Sample Resource Adapter", version = "1.0")
 public class NATSResourceAdapter implements ResourceAdapter {
-    final Map<NATSActivationSpec, EndpointTarget> targets = new ConcurrentHashMap<NATSActivationSpec, EndpointTarget>();
+    private static final Logger LOGGER = Logger.getLogger(NATSResourceAdapter.class.getName());
+    private final Map<NATSActivationSpec, EndpointTarget> targets = new ConcurrentHashMap<NATSActivationSpec, EndpointTarget>();
 
     private static final Method ONMESSAGE;
 
@@ -63,6 +66,12 @@ public class NATSResourceAdapter implements ResourceAdapter {
     @ConfigProperty
     private String baseAddress;
 
+    @ConfigProperty
+    private String clientId;
+
+    @ConfigProperty
+    private String clusterId;
+
     private WorkManager workManager;
     private StreamingConnectionFactory cf;
     private StreamingConnection connection;
@@ -73,12 +82,11 @@ public class NATSResourceAdapter implements ResourceAdapter {
         try {
             cf = new
                     StreamingConnectionFactory(new Options.Builder().natsUrl(baseAddress)
-                    .clusterId("yourclientid").clientId("anythingyoulike").build());
+                    .clusterId(clusterId).clientId(clientId).build());
 
             connection = cf.createConnection();
         } catch (Throwable t) {
-            // TODO: log this
-            t.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error starting connection to NATS server", t);
         }
     }
 
@@ -86,7 +94,7 @@ public class NATSResourceAdapter implements ResourceAdapter {
         try {
             connection.close();
         } catch (Throwable t) {
-            // TODO: log this
+            LOGGER.log(Level.SEVERE, "Error closing connection to NATS server", t);
         }
     }
 
@@ -136,7 +144,6 @@ public class NATSResourceAdapter implements ResourceAdapter {
     }
 
     public void publish(final String subject, final byte[] data) throws NATSException {
-        // publish a message
         try {
             connection.publish(subject, data);
         } catch (Exception e) {
@@ -178,7 +185,7 @@ public class NATSResourceAdapter implements ResourceAdapter {
                     messageEndpoint.afterDelivery();
                 }
             } catch (Throwable t) {
-                // TODO: log this
+                LOGGER.log(Level.SEVERE, "Error dispatching message from NATS to MDB endpoint", t);
             }
         }
 
@@ -196,7 +203,7 @@ public class NATSResourceAdapter implements ResourceAdapter {
                     subscription.close(true);
                 }
             } catch (IOException e) {
-                // TODO: log this
+                LOGGER.log(Level.SEVERE, "Error closing subscription to NATS subject", e);
             }
         }
     }
