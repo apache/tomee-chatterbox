@@ -1,0 +1,153 @@
+= Chatterbox NATS
+
+== Introduction
+
+This connector provides a sample for connecting to a NATS server from a Java EE environment, such as TomEE. NATS provides async messaging. At a high-level,
+you can connect to a NATS server and consume messages with the following code:
+
+[source,java]
+----
+         final StreamingConnectionFactory cf = new StreamingConnectionFactory(new Options.Builder().natsUrl(baseAddressNats)
+            .clusterId("cluster-id").clientId("client-id").build());
+
+         final StreamingConnection connection =  cf.createConnection();
+
+         connection.subscribe("scheduler:notify", new MessageHandler() {
+              @Override
+              public void onMessage(Message m) {
+                  try {
+                      // handle the message
+
+                      m.ack();
+                  } catch (Exception e) {
+                      // handle exception
+                  }
+              }
+          }
+----
+
+The challenge here is handling the MessageHander callback, with all the relevant dependency injections correctly available,
+in a portable manner, without specific knowledge of any app server internals. Message-driven beans provide the opportunity
+to do this.
+
+== Testing the example out
+
+The connector includes a very simple sample web application, which can both send and receive messages to/from a NATS server.
+You will need:
+
+* A NATS server
+* Some system properties
+
+The easy way to start a NATS server if you don't have one is to use the docker compose file included:
+
+[source,bash]
+----
+docker compose up -d
+----
+
+This will start a NATS server listening on tcp/4222 with a cluster ID of `mycluster`.
+
+Next we'll need to tell TomEE how to connect to that server - the easiest way to do this is to add the following lines to `~/.openejb/system.properties`
+
+NOTE: the system property name follows this format: <RAR name>.<property>=<value>.
+<RAR name> is the name of the RAR file, without the .rar extention, with "RA" appended on the end. For example, `chatterbox-nats-rar-0.3-SNAPSHOT.rar`
+becomes `chatterbox-nats-rar-0.3-SNAPSHOTRA`.
+
+[source]
+----
+chatterbox-nats-rar-0.3-SNAPSHOTRA.baseAddress=nats://localhost:4222
+chatterbox-nats-rar-0.3-SNAPSHOTRA.clusterId=mycluster
+chatterbox-nats-rar-0.3-SNAPSHOTRA.clientId=tomee1
+----
+
+We can now start the sample application using the TomEE Maven Plugin:
+
+[source,bash]
+----
+cd tomee-chatterbox/chatterbox-nats/chatterbox-nats-sample-war
+mvn clean install tomee:run
+----
+
+Once the application has started, running the following:
+
+[source,bash]
+----
+curl -d testing -v -H "Content-Type: text/plain" "http://localhost:8080/chatterbox-nats-sample-war-0.3-SNAPSHOT/sender/echo"
+----
+
+Will send the message "testing" to a NATS subject called "echo". The MDB in the application is listening on the "echo" subject and
+will echo any messages received to STDOUT.
+
+== I like it, can I deploy it in my TomEE instance?
+
+Absolutely. You'll need to do a couple of things:
+
+Firstly, the resource adapter has an API, and you'll want to deploy the jar file for that to the TomEE lib directory so both the server itself and any applications
+have visibility of it.
+
+Simple copy the chatterbox-nats-api JAR from this project to the TomEE lib folder.
+
+Next up, we need to deploy the resource adapter. You'll need the following config in `conf/tomee.xml` to enable the `apps` directory, and you'll need to create the `apps` directory itself:
+
+[source,xml]
+----
+    <Deployments dir="apps" />
+----
+
+And finally, configure the resource adapter in `conf/system.properties`:
+
+[source]
+----
+chatterbox-nats-rar-0.3-SNAPSHOTRA.baseAddress=nats://localhost:4222
+chatterbox-nats-rar-0.3-SNAPSHOTRA.clusterId=mycluster
+chatterbox-nats-rar-0.3-SNAPSHOTRA.clientId=tomee1
+----
+
+=== Sending messages to NATS (publishing to a subject)
+
+
+To send a message, inject the NATS connection factory into your bean:
+
+[source,java]
+----
+    @Resource
+    private NATSConnectionFactory cf;
+----
+
+and then get a connection and call its `publish()` method:
+
+[source,java]
+----
+    final NATSConnection connection = cf.getConnection();
+    connection.publish(subject, message.getBytes(StandardCharsets.UTF_8));
+    connection.close();
+----
+
+=== Receiving messages from NATS
+
+Messages can be received and acted upon in MDBs. The MDB should implement the `org.apache.tomee.chatterbox.nats.api.InboundListener` interface.
+Additionally, an activation property, `subject` is required. This is the NATS subject that the resource adapter will subscribe to for the MDB.
+The MDB's `onMessage` method will be invoked for any message sent to the subject.
+
+Please note that is the message requires acknowledgement, the MDB should call `org.apache.tomee.chatterbox.nats.api.NATSMessage.ack`. The sender
+will block until this is called.
+
+[source,java]
+----
+@MessageDriven(name = "Echo", activationConfig = {
+        @ActivationConfigProperty(propertyName = "subject", propertyValue = "echo")
+})
+public class EchoBean implements InboundListener {
+
+    @Override
+    public void onMessage(final NATSMessage message) throws NATSException {
+        try {
+            final String text = new String(message.getData(), StandardCharsets.UTF_8);
+            System.out.println(text);
+        } catch (Exception e) {
+            throw new NATSException(e);
+        }
+    }
+}
+----
+
