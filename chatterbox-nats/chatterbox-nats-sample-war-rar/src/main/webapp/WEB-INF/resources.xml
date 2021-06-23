@@ -1,0 +1,16 @@
+<resources>
+    <Resource id="NATS" class-name="org.apache.tomee.chatterbox.nats.adapter.NATSResourceAdapter">
+
+    </Resource>
+
+    <Container id="NATSContainer" ctype="MESSAGE">
+        ResourceAdapter NATS
+        ActivationSpecClass org.apache.tomee.chatterbox.nats.adapter.NATSActivationSpec
+        MessageListenerInterface org.apache.tomee.chatterbox.nats.api.InboundListener
+    </Container>
+
+    <Resource id="NATSConnectionFactory" type="org.apache.tomee.chatterbox.nats.api.NATSConnectionFactory" class-name="org.apache.tomee.chatterbox.nats.adapter.out.NATSManagedConnectionFactory">
+        ResourceAdapter NATS
+        TransactionSupport none
+    </Resource>
+</resources>

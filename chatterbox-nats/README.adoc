@@ -151,3 +151,36 @@ public class EchoBean implements InboundListener {
 }
 ----
 
+== Embedding the RAR in WAR
+
+See the chatterbox-nats-sample-war-rar for an example of this. This includes the API and IMPL jars (not the rar itself) in the web application's WEB-INF/lib.
+The resource adapter, connection factory, and MDB container are configured in the application's WEB-INF/resources.xml - this effectively is the tomee.xml equivalent
+of what goes in a rar file's ra.xml.
+
+[source,xml]
+----
+<resources>
+    <Resource id="NATS" class-name="org.apache.tomee.chatterbox.nats.adapter.NATSResourceAdapter">
+
+    </Resource>
+
+    <Container id="NATSContainer" ctype="MESSAGE">
+        ResourceAdapter NATS
+        ActivationSpecClass org.apache.tomee.chatterbox.nats.adapter.NATSActivationSpec
+        MessageListenerInterface org.apache.tomee.chatterbox.nats.api.InboundListener
+    </Container>
+
+    <Resource id="NATSConnectionFactory" type="org.apache.tomee.chatterbox.nats.api.NATSConnectionFactory" class-name="org.apache.tomee.chatterbox.nats.adapter.out.NATSManagedConnectionFactory">
+        ResourceAdapter NATS
+        TransactionSupport none
+    </Resource>
+</resources>
+----
+
+We still need to supply the baseUrl, clusterId and clientId to the resource adapter. This can be hardcoded in WEB-INF/resources.xml if you wish, or you can specify them as system properties:
+
+----
+NATS.baseAddress=nats://localhost
+NATS.clusterId=mycluster
+NATS.clientId=tomee1
+----
