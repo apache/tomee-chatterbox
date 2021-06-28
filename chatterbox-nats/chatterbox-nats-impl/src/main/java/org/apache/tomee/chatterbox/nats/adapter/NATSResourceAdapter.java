@@ -22,6 +22,8 @@ import io.nats.streaming.Options;
 import io.nats.streaming.StreamingConnection;
 import io.nats.streaming.StreamingConnectionFactory;
 import io.nats.streaming.Subscription;
+import io.nats.streaming.SubscriptionOptions;
+
 import org.apache.tomee.chatterbox.nats.api.InboundListener;
 import org.apache.tomee.chatterbox.nats.api.NATSException;
 import org.apache.tomee.chatterbox.nats.api.NATSMessage;
@@ -42,6 +44,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.lang.IllegalStateException;
@@ -112,7 +115,9 @@ public class NATSResourceAdapter implements ResourceAdapter {
                     final EndpointTarget target = new EndpointTarget(messageEndpoint);
                     targets.put(NATSActivationSpec, target);
 
-                    final Subscription subscription = connection.subscribe(((NATSActivationSpec) activationSpec).getSubject(), target);
+                    final Subscription subscription = connection.subscribe(((NATSActivationSpec) activationSpec).getSubject(), target, 
+                    		new SubscriptionOptions.Builder().startWithLastReceived().manualAcks().ackWait(Duration.ofSeconds(Integer.parseInt(((NATSActivationSpec) activationSpec).getAckWait())))
+                            .durableName(((NATSActivationSpec) activationSpec).getDurableName()).build());
                     target.setSubscription(subscription);
                 } catch (Exception e) {
                     e.printStackTrace();

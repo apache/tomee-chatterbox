@@ -30,8 +30,26 @@ public class NATSActivationSpec implements ActivationSpec {
     private ResourceAdapter resourceAdapter;
     private Class beanClass;
     private String subject;
+    private String durableName;
+    private String ackWait;
 
-    public Class getBeanClass() {
+    public String getDurableName() {
+		return durableName;
+	}
+
+	public void setDurableName(String durableName) {
+		this.durableName = durableName;
+	}
+
+	public String getAckWait() {
+		return ackWait;
+	}
+
+	public void setAckWait(String ackWait) {
+		this.ackWait = ackWait;
+	}
+
+	public Class getBeanClass() {
         return beanClass;
     }
 
