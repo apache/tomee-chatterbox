@@ -40,7 +40,7 @@
     <version.openejb>8.0.1</version.openejb>
     <version.crest>0.3</version.crest>
     <maven.checkstyle.plugin.version>2.16</maven.checkstyle.plugin.version>
-    <smack-core.version>4.0.6</smack-core.version>
+    <smack-core.version>4.1.9</smack-core.version>
   </properties>
 
   <dependencyManagement>
